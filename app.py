@@ -3,8 +3,7 @@ import re
 import threading
 import traceback
 import uuid
-
-import pandas as pd
+import csv
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 from config import Config
@@ -81,94 +80,63 @@ def render_table_with_id(unique_id):
     return render_template("table.html", unique_id=unique_id)
 
 
-@app.route("/table_data/<unique_id>", methods=["POST"])
+@app.route("/serve_table_data/<unique_id>")
 def serve_table_data(unique_id):
     try:
-        print(f"\n=== Processing request for table_data/{unique_id} ===")
-        print(f"Request form data: {request.form}")
+        if not os.path.exists(f"data/pages/{unique_id}.csv"):
+            return jsonify({"error": "File not found"})
 
-        df = pd.read_csv(f"data/pages/{unique_id}.csv")
-        print(f"Loaded CSV with {len(df)} total records")
-
-        total_records = len(df)
-        draw = int(request.form.get("draw", 0))
-        start = int(request.form.get("start", 0))
-        length = int(request.form.get("length", 250))
-        search_value = request.form.get("search[value]", "")
-        order_column = int(request.form.get("order[0][column]", 0))
-        order_direction = request.form.get("order[0][dir]", "asc")
-
-        print(f"\nPagination params:")
-        print(f"- Start: {start}")
-        print(f"- Length: {length}")
-        print(f"- Search value: {search_value}")
-        print(f"- Order column: {order_column}")
-        print(f"- Order direction: {order_direction}")
-
-        if search_value:
-            search_value = search_value.replace("\\", "\\\\")
-            search_value = re.escape(search_value)
-            query = "|".join(
-                [
-                    f'{col}.str.contains("{search_value}", case=False, na=False)'
-                    for col in df.columns
-                    if df[col].dtype == "object"
-                ]
-            )
-            if query:
-                df = df[df.eval(query)]
-                print(f"\nAfter search filter: {len(df)} records remaining")
-
-        if order_column < len(df.columns):
-            print(f"\nSorting by column: {df.columns[order_column]}")
-            col_name = df.columns[order_column]
-            sorted_df = df.copy()
-            if col_name == "price":
-                sorted_df["sort_val"] = (
-                    sorted_df[col_name]
-                    .replace(r"[€$£A$CA$CHF¥SEKR$MX$NZ$DKKZAR,]", "", regex=True)
-                    .astype(float)
-                )
-                print("Applied price sorting conversion")
-
-            elif sorted_df[col_name].dtype in ["int64", "float64"]:
-                sorted_df["sort_val"] = sorted_df[col_name]
-            else:
-                sorted_df["sort_val"] = sorted_df[col_name].astype(str)
-
-            sorted_df.sort_values(
-                by="sort_val", ascending=(order_direction == "asc"), inplace=True
-            )
-            sorted_df.drop(columns=["sort_val"], inplace=True)
-
-        df_subset = sorted_df.iloc[start : start + length]
-        print(f"\nReturning subset of {len(df_subset)} records")
-
+        # Read CSV file
         data = []
-        for _, row in df_subset.iterrows():
-            data.append(row.tolist())
+        with open(f"data/pages/{unique_id}.csv", 'r', newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            data = list(reader)
+
+        # Sort data if requested
+        order_column = request.args.get('order[0][column]')
+        order_dir = request.args.get('order[0][dir]')
+        if order_column and order_dir:
+            # Get the column name from the index
+            columns = ['title', 'price', 'condition', 'format', 'year']  # Add all your column names
+            sort_col = columns[int(order_column)]
+            reverse = order_dir == 'desc'
+            data.sort(key=lambda x: x[sort_col], reverse=reverse)
+
+        # Apply search if provided
+        search = request.args.get('search[value]')
+        if search:
+            search = search.lower()
+            filtered_data = []
+            for row in data:
+                if any(search in str(val).lower() for val in row.values()):
+                    filtered_data.append(row)
+            data = filtered_data
+
+        # Get pagination parameters
+        start = int(request.args.get('start', 0))
+        length = int(request.args.get('length', 10))
+
+        # Paginate the results
+        paginated_data = data[start:start + length]
 
         response_data = {
-            "draw": draw,
-            "recordsTotal": total_records,
-            "recordsFiltered": len(df),
-            "data": data,
+            "draw": int(request.args.get('draw', 1)),
+            "recordsTotal": len(data),
+            "recordsFiltered": len(data),
+            "data": paginated_data,
         }
 
         print("\nResponse summary:")
         print(f"- Total records: {response_data['recordsTotal']}")
         print(f"- Filtered records: {response_data['recordsFiltered']}")
-        print(f"- Records in this chunk: {len(response_data['data'])}")
-        print("=== End of request processing ===\n")
+        print(f"- Records in this page: {len(response_data['data'])}")
 
         return jsonify(response_data)
 
     except Exception as e:
-        print("\n=== ERROR in table_data processing ===")
-        print("Error Occurred: ", str(e))
+        print(f"Error in serve_table_data: {str(e)}")
         print(traceback.format_exc())
-        print("=== End of error trace ===\n")
-        return "Internal Server Error", 500
+        return jsonify({"error": str(e)})
 
 
 if __name__ == "__main__":
