@@ -28,6 +28,9 @@ def index():
             "vinyls": "&format=Vinyl"
             if request.form.get("vinyls_only") == "on"
             else "",
+            "genre": f"&genre={request.form.get('genre')}"
+            if request.form.get('genre')
+            else "",
         }
         is_seller = verify_seller(form_data["user_input"])
 

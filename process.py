@@ -180,42 +180,42 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
     try:
         if year == 0 and count == 0:
             print(
-                f"Scraping page: {Config.DISCOGS_URL.format(form_data['user_input'],form_data['vinyls'], start_page)}"
+                f"Scraping page: {Config.DISCOGS_URL.format(form_data['user_input'], form_data['vinyls'], form_data['genre'], start_page)}"
             )
             response = scraper.get(
                 Config.DISCOGS_URL.format(
-                    form_data["user_input"], form_data["vinyls"], start_page
+                    form_data["user_input"], form_data["vinyls"], form_data['genre'], start_page
                 ),
                 headers=Config.headers_agent,
             )
         elif year == 0 and count != 0:
             print(
-                f"Scraping LARGE page: {Config.DISCOGS_URL_ASC.format(form_data['user_input'],form_data['vinyls'], start_page)}"
+                f"Scraping LARGE page: {Config.DISCOGS_URL_ASC.format(form_data['user_input'], form_data['vinyls'], form_data['genre'], start_page)}"
             )
             response = scraper.get(
                 Config.DISCOGS_URL_ASC.format(
-                    form_data["user_input"], form_data["vinyls"], start_page
+                    form_data["user_input"], form_data["vinyls"], form_data['genre'], start_page
                 ),
                 headers=Config.headers_agent,
             )
         elif year != 0:
             if count <= 10000:
                 print(
-                    f"Scraping YEAR: {Config.DISCOGS_URL_YEAR_PAGE.format(form_data['user_input'],form_data['vinyls'], year, start_page)}"
+                    f"Scraping YEAR: {Config.DISCOGS_URL_YEAR_PAGE.format(form_data['user_input'], form_data['vinyls'], form_data['genre'], year, start_page)}"
                 )
                 response = scraper.get(
                     Config.DISCOGS_URL_YEAR_PAGE.format(
-                        form_data["user_input"], form_data["vinyls"], year, start_page
+                        form_data["user_input"], form_data["vinyls"], form_data['genre'], year, start_page
                     ),
                     headers=Config.headers_agent,
                 )
             else:
                 print(
-                    f"Scraping YEAR OVER 10 000: {Config.DISCOGS_URL_YEAR_ASC_PAGE.format(form_data['user_input'],form_data['vinyls'], year, start_page)}"
+                    f"Scraping YEAR OVER 10 000: {Config.DISCOGS_URL_YEAR_ASC_PAGE.format(form_data['user_input'], form_data['vinyls'], form_data['genre'], year, start_page)}"
                 )
                 response = scraper.get(
                     Config.DISCOGS_URL_YEAR_ASC_PAGE.format(
-                        form_data["user_input"], form_data["vinyls"], year, start_page
+                        form_data["user_input"], form_data["vinyls"], form_data['genre'], year, start_page
                     ),
                     headers=Config.headers_agent,
                 )
@@ -316,14 +316,14 @@ def get_threads(form_data, start_page=1, year=0):
     if year == 0:
         response = scraper.get(
             Config.DISCOGS_URL.format(
-                form_data["user_input"], form_data["vinyls"], start_page
+                form_data["user_input"], form_data["vinyls"], form_data['genre'], start_page
             ),
             headers=Config.headers_agent,
         )
     elif year != 0:
         response = scraper.get(
             Config.DISCOGS_URL_YEAR_PAGE.format(
-                form_data["user_input"], form_data["vinyls"], year, start_page
+                form_data["user_input"], form_data["vinyls"], form_data['genre'], year, start_page
             ),
             headers=Config.headers_agent,
         )
@@ -343,7 +343,7 @@ def get_items(form_data, start_page=1):
     scraper = cloudscraper.create_scraper()
     response = scraper.get(
         Config.DISCOGS_URL.format(
-            form_data["user_input"], form_data["vinyls"], start_page
+            form_data["user_input"], form_data["vinyls"], form_data['genre'], start_page
         ),
         headers=Config.headers_agent,
     )
