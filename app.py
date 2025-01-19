@@ -20,13 +20,15 @@ def index():
         unique_id = str(uuid.uuid4())
         TASKS_STATUS[unique_id] = {"completed": False}
 
-        # Get the genre value
+        # Get the genre and style values
         genre = request.form.get("genre", "").strip()
+        style = request.form.get("style", "").strip()
 
         form_data = {
             "user_input": request.form.get("user_input"),
             "vinyls": "",  # Initialize empty
             "genre": "",   # Initialize empty
+            "style": "",   # Initialize empty
         }
         
         # Only add parameters if they are provided
@@ -34,6 +36,8 @@ def index():
             form_data["vinyls"] = "&format=Vinyl"
         if genre:
             form_data["genre"] = f"&genre={genre}"
+        if style:
+            form_data["style"] = f"&style={style}"
 
         print(f"Form data: {form_data}")  # Debug print
         is_seller = verify_seller(form_data["user_input"])
