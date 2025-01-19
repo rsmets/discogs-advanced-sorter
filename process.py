@@ -131,19 +131,20 @@ def verify_seller(seller):
         print(response)
         if response.status_code == 200:
             html = HTMLParser(response.text)
-            records = html.css(".no_marketplace_results")
-
-            if records:
-                print(".no_marketplace_results exists!")
-                return False
-            else:
-                print(".no_marketplace_results does not exist!")
-                return True
+            # Check for items in the marketplace
+            items = html.css(".shortcut_navigable")
+            # Also check for pagination as a backup
+            pagination = html.css(".pagination_total")
+            
+            has_items = len(items) > 0 or len(pagination) > 0
+            print(f"Found items: {len(items)}, Found pagination: {len(pagination)}")
+            return has_items
         else:
             print("Wrong status code")
             return False
     except Exception as e:
         print(f"Error in verify_seller function: {e}")
+        return False
 
 
 def save_records_to_csv(records, unique_id):

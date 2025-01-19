@@ -25,9 +25,15 @@ def index():
 
         form_data = {
             "user_input": request.form.get("user_input"),
-            "vinyls": "&format=Vinyl" if request.form.get("vinyls_only") == "on" else "",
-            "genre": f"&genre={genre}" if genre else "",
+            "vinyls": "",  # Initialize empty
+            "genre": "",   # Initialize empty
         }
+        
+        # Only add parameters if they are provided
+        if request.form.get("vinyls_only") == "on":
+            form_data["vinyls"] = "&format=Vinyl"
+        if genre:
+            form_data["genre"] = f"&genre={genre}"
 
         print(f"Form data: {form_data}")  # Debug print
         is_seller = verify_seller(form_data["user_input"])
