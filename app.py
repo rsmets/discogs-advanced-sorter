@@ -27,10 +27,10 @@ def index():
         form_data = {
             "user_input": request.form.get("user_input"),
             "vinyls": "",  # Initialize empty
-            "genre": "",   # Initialize empty
-            "style": "",   # Initialize empty
+            "genre": "",  # Initialize empty
+            "style": "",  # Initialize empty
         }
-        
+
         # Only add parameters if they are provided
         if request.form.get("vinyls_only") == "on":
             form_data["vinyls"] = "&format=Vinyl"
@@ -136,11 +136,13 @@ def serve_table_data(unique_id):
             else:
                 sorted_df["sort_val"] = sorted_df[col_name].astype(str)
 
+            # Perform sorting
             sorted_df.sort_values(
                 by="sort_val", ascending=(order_direction == "asc"), inplace=True
             )
-            sorted_df.drop(columns=["sort_val"], inplace=True)
+            sorted_df.drop(columns=["sort_val"], inplace=True)  # drop auxiliary column
 
+        # Extract the necessary subset after sorting
         df_subset = sorted_df.iloc[start : start + length]
         print(f"\nReturning subset of {len(df_subset)} records")
 
