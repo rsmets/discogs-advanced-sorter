@@ -143,5 +143,5 @@ def serve_table_data(unique_id):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    # Only used for local development
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=True)
