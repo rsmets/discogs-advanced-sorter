@@ -125,7 +125,7 @@ def verify_seller(seller):
         print(f"Input: {seller}")
         scraper = cloudscraper.create_scraper()
         response = scraper.get(
-            Config.DISCOGS_URL.format(seller, "", 1),
+            Config.DISCOGS_URL.format(seller, "", "", 1),  # Empty strings for vinyls and genre
             headers=Config.headers_agent,
         )
         print(response)
@@ -179,12 +179,13 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
     scraper = cloudscraper.create_scraper()
     try:
         # Debug print to see what parameters we're working with
-        print(f"Processing with params: query_params={form_data['vinyls']}, page={start_page}")
+        print(f"Processing with params: vinyls={form_data['vinyls']}, genre={form_data.get('genre', '')}, page={start_page}")
         
         if year == 0 and count == 0:
             url = Config.DISCOGS_URL.format(
                 form_data["user_input"],
                 form_data["vinyls"],
+                form_data.get("genre", ""),
                 start_page
             )
             print(f"Scraping page: {url}")
@@ -194,6 +195,7 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
             url = Config.DISCOGS_URL_ASC.format(
                 form_data["user_input"],
                 form_data["vinyls"],
+                form_data.get("genre", ""),
                 start_page
             )
             print(f"Scraping LARGE page: {url}")
@@ -204,6 +206,7 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
                 url = Config.DISCOGS_URL_YEAR_PAGE.format(
                     form_data["user_input"],
                     form_data["vinyls"],
+                    form_data.get("genre", ""),
                     year,
                     start_page
                 )
@@ -213,6 +216,7 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
                 url = Config.DISCOGS_URL_YEAR_ASC_PAGE.format(
                     form_data["user_input"],
                     form_data["vinyls"],
+                    form_data.get("genre", ""),
                     year,
                     start_page
                 )
@@ -342,15 +346,21 @@ def get_items(form_data, start_page=1):
     scraper = cloudscraper.create_scraper()
     response = scraper.get(
         Config.DISCOGS_URL.format(
-            form_data["user_input"], form_data["vinyls"], form_data['genre'], start_page
+            form_data["user_input"], form_data["vinyls"], form_data.get('genre', ''), start_page
         ),
         headers=Config.headers_agent,
     )
 
     html = HTMLParser(response.text)
     pagination_total = html.css(".pagination.top .pagination_total")
-
+    
+    total_items = 0  # Initialize with default value
     for node in pagination_total:
-        total_items = int(node.text().split("of")[-1].strip().replace(",", ""))
-    print("get_items end")
+        try:
+            total_items = int(node.text().split("of")[-1].strip().replace(",", ""))
+        except (ValueError, IndexError) as e:
+            print(f"Error parsing pagination: {e}")
+            total_items = 0
+    
+    print(f"get_items end - found {total_items} items")
     return total_items

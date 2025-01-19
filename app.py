@@ -1,18 +1,14 @@
-from flask import Flask, redirect, render_template, request, jsonify, url_for
-from process import (
-    TASKS_STATUS,
-    verify_seller,
-    save_uuid_to_file,
-    initiate_task,
-)
-from config import Config
-
-import threading
-import uuid
-import pandas as pd
-import traceback
-import re
 import os
+import re
+import threading
+import traceback
+import uuid
+
+import pandas as pd
+from flask import Flask, jsonify, redirect, render_template, request, url_for
+
+from config import Config
+from process import TASKS_STATUS, initiate_task, save_uuid_to_file, verify_seller
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -23,25 +19,16 @@ def index():
     if request.method == "POST":
         unique_id = str(uuid.uuid4())
         TASKS_STATUS[unique_id] = {"completed": False}
-        
+
         # Get the genre value
-        genre = request.form.get('genre', '').strip()
-        
-        # Build the query parameters string
-        query_params = []
-        if request.form.get("vinyls_only") == "on":
-            query_params.append("format=Vinyl")
-        if genre:
-            query_params.append(f"genre={genre}")
-            
-        # Combine parameters with & if there are any
-        combined_params = "&" + "&".join(query_params) if query_params else ""
-        
+        genre = request.form.get("genre", "").strip()
+
         form_data = {
             "user_input": request.form.get("user_input"),
-            "vinyls": combined_params
+            "vinyls": "&format=Vinyl" if request.form.get("vinyls_only") == "on" else "",
+            "genre": f"&genre={genre}" if genre else "",
         }
-        
+
         print(f"Form data: {form_data}")  # Debug print
         is_seller = verify_seller(form_data["user_input"])
 
@@ -157,7 +144,7 @@ def serve_table_data(unique_id):
             "recordsFiltered": len(df),
             "data": data,
         }
-        
+
         print("\nResponse summary:")
         print(f"- Total records: {response_data['recordsTotal']}")
         print(f"- Filtered records: {response_data['recordsFiltered']}")
