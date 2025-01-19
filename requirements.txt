@@ -1,4 +1,5 @@
 Flask==2.3.3
 cloudscraper==1.2.71
-pandas==2.1.1
 selectolax==0.3.16
+pandas==1.5.3
+numpy==1.23.5
