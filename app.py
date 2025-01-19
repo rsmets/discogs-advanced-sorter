@@ -172,4 +172,5 @@ def serve_table_data(unique_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    if os.environ.get("VERCEL") is None:
+        app.run(debug=True)

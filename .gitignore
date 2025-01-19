@@ -10,3 +10,4 @@ data/pages/*
 !data/pages/.gitkeep
 uuids.txt
 .DS_Store
+.vercel

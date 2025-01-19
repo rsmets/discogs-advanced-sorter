@@ -1,5 +1,5 @@
 class Config:
-    SERVER_NAME = "127.0.0.1:5000"
+    SERVER_NAME = None  # Let Vercel handle this
     APPLICATION_ROOT = "/"
     PREFERRED_URL_SCHEME = "http"
     # Base URLs with placeholders for seller, format/vinyl, genre, style, page, and year
