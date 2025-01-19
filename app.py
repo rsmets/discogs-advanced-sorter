@@ -73,10 +73,11 @@ def render_table_with_id(unique_id):
 @app.route("/table_data/<unique_id>", methods=["POST"])
 def serve_table_data(unique_id):
     try:
-        """if not is_valid_uuid(unique_id):
-        return "Invalid URL", 404"""
+        print(f"\n=== Processing request for table_data/{unique_id} ===")
+        print(f"Request form data: {request.form}")
 
         df = pd.read_csv(f"data/pages/{unique_id}.csv")
+        print(f"Loaded CSV with {len(df)} total records")
 
         total_records = len(df)
         draw = int(request.form.get("draw", 0))
@@ -85,6 +86,13 @@ def serve_table_data(unique_id):
         search_value = request.form.get("search[value]", "")
         order_column = int(request.form.get("order[0][column]", 0))
         order_direction = request.form.get("order[0][dir]", "asc")
+
+        print(f"\nPagination params:")
+        print(f"- Start: {start}")
+        print(f"- Length: {length}")
+        print(f"- Search value: {search_value}")
+        print(f"- Order column: {order_column}")
+        print(f"- Order direction: {order_direction}")
 
         if search_value:
             search_value = search_value.replace("\\", "\\\\")
@@ -98,8 +106,10 @@ def serve_table_data(unique_id):
             )
             if query:
                 df = df[df.eval(query)]
+                print(f"\nAfter search filter: {len(df)} records remaining")
 
         if order_column < len(df.columns):
+            print(f"\nSorting by column: {df.columns[order_column]}")
             col_name = df.columns[order_column]
             sorted_df = df.copy()
             if col_name == "price":
@@ -108,20 +118,20 @@ def serve_table_data(unique_id):
                     .replace(r"[€$£A$CA$CHF¥SEKR$MX$NZ$DKKZAR,]", "", regex=True)
                     .astype(float)
                 )
+                print("Applied price sorting conversion")
 
             elif sorted_df[col_name].dtype in ["int64", "float64"]:
                 sorted_df["sort_val"] = sorted_df[col_name]
             else:
                 sorted_df["sort_val"] = sorted_df[col_name].astype(str)
 
-            # Perform sorting
             sorted_df.sort_values(
                 by="sort_val", ascending=(order_direction == "asc"), inplace=True
             )
-            sorted_df.drop(columns=["sort_val"], inplace=True)  # drop auxiliary column
+            sorted_df.drop(columns=["sort_val"], inplace=True)
 
-        # Extract the necessary subset after sorting
         df_subset = sorted_df.iloc[start : start + length]
+        print(f"\nReturning subset of {len(df_subset)} records")
 
         data = []
         for _, row in df_subset.iterrows():
@@ -133,12 +143,20 @@ def serve_table_data(unique_id):
             "recordsFiltered": len(df),
             "data": data,
         }
+        
+        print("\nResponse summary:")
+        print(f"- Total records: {response_data['recordsTotal']}")
+        print(f"- Filtered records: {response_data['recordsFiltered']}")
+        print(f"- Records in this chunk: {len(response_data['data'])}")
+        print("=== End of request processing ===\n")
 
         return jsonify(response_data)
 
     except Exception as e:
+        print("\n=== ERROR in table_data processing ===")
         print("Error Occurred: ", str(e))
         print(traceback.format_exc())
+        print("=== End of error trace ===\n")
         return "Internal Server Error", 500
 
 
