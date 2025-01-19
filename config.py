@@ -2,6 +2,7 @@ class Config:
     SERVER_NAME = "127.0.0.1:5000"
     APPLICATION_ROOT = "/"
     PREFERRED_URL_SCHEME = "http"
+    # Base URLs with placeholders for seller, format/vinyl, genre, page, and year
     DISCOGS_URL = "https://www.discogs.com/seller/{}/profile?sort=listed%2Cdesc&limit=250{}{}&page={}"
     DISCOGS_URL_ASC = "https://www.discogs.com/seller/{}/profile?sort=listed%2Casc&limit=250{}{}&page={}"
     DISCOGS_URL_YEAR_PAGE = "https://www.discogs.com/seller/{}/profile?sort=listed%2Cdesc&limit=250{}{}&year={}&page={}"

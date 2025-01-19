@@ -178,47 +178,50 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
     print("scrap_and_process start")
     scraper = cloudscraper.create_scraper()
     try:
+        # Debug print to see what parameters we're working with
+        print(f"Processing with params: vinyls={form_data['vinyls']}, genre={form_data['genre']}, page={start_page}")
+        
         if year == 0 and count == 0:
-            print(
-                f"Scraping page: {Config.DISCOGS_URL.format(form_data['user_input'], form_data['vinyls'], form_data['genre'], start_page)}"
+            url = Config.DISCOGS_URL.format(
+                form_data["user_input"],
+                form_data["vinyls"],
+                form_data["genre"],
+                start_page
             )
-            response = scraper.get(
-                Config.DISCOGS_URL.format(
-                    form_data["user_input"], form_data["vinyls"], form_data['genre'], start_page
-                ),
-                headers=Config.headers_agent,
-            )
+            print(f"Scraping page: {url}")
+            response = scraper.get(url, headers=Config.headers_agent)
+            
         elif year == 0 and count != 0:
-            print(
-                f"Scraping LARGE page: {Config.DISCOGS_URL_ASC.format(form_data['user_input'], form_data['vinyls'], form_data['genre'], start_page)}"
+            url = Config.DISCOGS_URL_ASC.format(
+                form_data["user_input"],
+                form_data["vinyls"],
+                form_data["genre"],
+                start_page
             )
-            response = scraper.get(
-                Config.DISCOGS_URL_ASC.format(
-                    form_data["user_input"], form_data["vinyls"], form_data['genre'], start_page
-                ),
-                headers=Config.headers_agent,
-            )
+            print(f"Scraping LARGE page: {url}")
+            response = scraper.get(url, headers=Config.headers_agent)
+            
         elif year != 0:
             if count <= 10000:
-                print(
-                    f"Scraping YEAR: {Config.DISCOGS_URL_YEAR_PAGE.format(form_data['user_input'], form_data['vinyls'], form_data['genre'], year, start_page)}"
+                url = Config.DISCOGS_URL_YEAR_PAGE.format(
+                    form_data["user_input"],
+                    form_data["vinyls"],
+                    form_data["genre"],
+                    year,
+                    start_page
                 )
-                response = scraper.get(
-                    Config.DISCOGS_URL_YEAR_PAGE.format(
-                        form_data["user_input"], form_data["vinyls"], form_data['genre'], year, start_page
-                    ),
-                    headers=Config.headers_agent,
-                )
+                print(f"Scraping YEAR: {url}")
+                response = scraper.get(url, headers=Config.headers_agent)
             else:
-                print(
-                    f"Scraping YEAR OVER 10 000: {Config.DISCOGS_URL_YEAR_ASC_PAGE.format(form_data['user_input'], form_data['vinyls'], form_data['genre'], year, start_page)}"
+                url = Config.DISCOGS_URL_YEAR_ASC_PAGE.format(
+                    form_data["user_input"],
+                    form_data["vinyls"],
+                    form_data["genre"],
+                    year,
+                    start_page
                 )
-                response = scraper.get(
-                    Config.DISCOGS_URL_YEAR_ASC_PAGE.format(
-                        form_data["user_input"], form_data["vinyls"], form_data['genre'], year, start_page
-                    ),
-                    headers=Config.headers_agent,
-                )
+                print(f"Scraping YEAR OVER 10 000: {url}")
+                response = scraper.get(url, headers=Config.headers_agent)
 
         htmlParser = HTMLParser(response.text)
 

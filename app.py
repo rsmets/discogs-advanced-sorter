@@ -23,15 +23,21 @@ def index():
     if request.method == "POST":
         unique_id = str(uuid.uuid4())
         TASKS_STATUS[unique_id] = {"completed": False}
+        
+        # Get the genre value
+        genre = request.form.get('genre', '').strip()
+        
         form_data = {
             "user_input": request.form.get("user_input"),
             "vinyls": "&format=Vinyl"
             if request.form.get("vinyls_only") == "on"
             else "",
-            "genre": f"&genre={request.form.get('genre')}"
-            if request.form.get('genre')
+            "genre": f"&genre={genre}"
+            if genre
             else "",
         }
+        
+        print(f"Form data: {form_data}")  # Debug print
         is_seller = verify_seller(form_data["user_input"])
 
         if not is_seller:
