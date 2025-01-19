@@ -179,13 +179,12 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
     scraper = cloudscraper.create_scraper()
     try:
         # Debug print to see what parameters we're working with
-        print(f"Processing with params: vinyls={form_data['vinyls']}, genre={form_data['genre']}, page={start_page}")
+        print(f"Processing with params: query_params={form_data['vinyls']}, page={start_page}")
         
         if year == 0 and count == 0:
             url = Config.DISCOGS_URL.format(
                 form_data["user_input"],
                 form_data["vinyls"],
-                form_data["genre"],
                 start_page
             )
             print(f"Scraping page: {url}")
@@ -195,7 +194,6 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
             url = Config.DISCOGS_URL_ASC.format(
                 form_data["user_input"],
                 form_data["vinyls"],
-                form_data["genre"],
                 start_page
             )
             print(f"Scraping LARGE page: {url}")
@@ -206,7 +204,6 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
                 url = Config.DISCOGS_URL_YEAR_PAGE.format(
                     form_data["user_input"],
                     form_data["vinyls"],
-                    form_data["genre"],
                     year,
                     start_page
                 )
@@ -216,7 +213,6 @@ def scrap_and_process(form_data, start_page=1, year=0, count=0):
                 url = Config.DISCOGS_URL_YEAR_ASC_PAGE.format(
                     form_data["user_input"],
                     form_data["vinyls"],
-                    form_data["genre"],
                     year,
                     start_page
                 )

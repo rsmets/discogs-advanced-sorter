@@ -27,14 +27,19 @@ def index():
         # Get the genre value
         genre = request.form.get('genre', '').strip()
         
+        # Build the query parameters string
+        query_params = []
+        if request.form.get("vinyls_only") == "on":
+            query_params.append("format=Vinyl")
+        if genre:
+            query_params.append(f"genre={genre}")
+            
+        # Combine parameters with & if there are any
+        combined_params = "&" + "&".join(query_params) if query_params else ""
+        
         form_data = {
             "user_input": request.form.get("user_input"),
-            "vinyls": "&format=Vinyl"
-            if request.form.get("vinyls_only") == "on"
-            else "",
-            "genre": f"&genre={genre}"
-            if genre
-            else "",
+            "vinyls": combined_params
         }
         
         print(f"Form data: {form_data}")  # Debug print
